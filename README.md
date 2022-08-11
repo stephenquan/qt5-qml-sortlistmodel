@@ -18,13 +18,15 @@ For example:
 ```qml
 SortListModel {
     id: cities
+    property var orderByCity: (a, b) => a.city.localeCompare(b.city)
+    property var compare: orderByCity
 }
 
 Button {
     text: qsTr("Add Melbourne")
     onClicked: {
         cities.append( { "city": "Melbourne" } );
-        cities.incrementalSort( (a,b) => a.city.localeCompare(b.city) );
+        cities.incrementalSort( cities.compare );
     }
 }
 ```
@@ -36,7 +38,9 @@ of large lists. We can keep track of where the list was sorted, and use
 ```qml
 SortListModel {
     id: cities
-    property var compare: (a, b) => a.city.localeCompare(b.city)
+    property var orderByCity: (a, b) => a.city.localeCompare(b.city)
+    property var orderByCityDescending: (a, b) => -a.city.localeCompare(b.city)
+    property var compare: orderByCity
     property int sorted: 0
     function sortOne() {
         if (sorted >= count) return;
@@ -47,6 +51,22 @@ SortListModel {
     function sortAll() {
         sorted = 0;
         Qt.callLater(sortOne);
+    }
+}
+
+Button {
+    text: qsTr("Sort by City")
+    onClicked: {
+        cities.compare = cities.orderByCity;
+        cities.sortAll();
+     }
+}
+
+Button {
+    text: qsTr("Sort by City Descending")
+    onClicked: {
+        cities.compare = cities.orderByCityDescending;
+        cities.sortAll();
     }
 }
 ```
