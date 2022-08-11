@@ -1,9 +1,19 @@
 # qt5-qml-sortlistmodel
 Implements SortListModel QML component.
 
-It is based on the ListModel QML component but with methods for incremental sort and full sort.
-It is an in-place sort, in which the ListModel has records added to it, usually with append and incrementalSort method is used to move that record to the correct place.
-The algorithm for the incremental sort is based on a combination of binary search and merge sort.
+It extends the ListModel QML component with the following methods:
+
+ - findInsertIndex(item, head, tail, compareFunc)
+ - sortItems(head, tail, compareFunc)
+ - incrementalSort(compareFunc)
+ - sort(compareFunc)
+
+These methods help us implement an in-place sort.
+
+It requires the record to already be in the ListModel, typically at the
+end with `append` and moved to the correct place with `incrementalSort`.
+
+For example:
 
 ```qml
 SortListModel {
@@ -19,9 +29,9 @@ Button {
 }
 ```
 
-When used with Qt.callLater, we can get interesting UI friendly sorting of large lists.
-We can keep track of where the list was sorted, and apply sort from that point onwards.
-This is useful for resetting the sort such as changing the compare function for different sort orders.
+When used with `Qt.callLater`, we can get interesting UI friendly resorting
+of large lists. We can keep track of where the list was sorted, and use
+`sortItems` to continue sorting records from that point onwards.
 
 ```qml
 SortListModel {
@@ -41,7 +51,12 @@ SortListModel {
 }
 ```
 
-To use SortListModel QML component in your project consider cloning this repo directly in your project:
+For completeness a `sort` method is provide which performs a full sort,
+but, for very large list this could have unintended consequences of
+blocking the UI.
+
+To use SortListModel QML component in your project consider cloning this
+repo directly in your project:
 
     git clone https://github.com/stephenquan/qt5-qml-sortlistmodel.git
     
