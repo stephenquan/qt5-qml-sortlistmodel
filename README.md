@@ -16,17 +16,21 @@ end with `append` and moved to the correct place with `incrementalSort`.
 For example:
 
 ```qml
-SortListModel {
-    id: cities
-    property var orderByCity: (a, b) => a.city.localeCompare(b.city)
-    property var compare: orderByCity
-}
+import "qt5-qml-sortlistmodel"
 
-Button {
-    text: qsTr("Add Melbourne")
-    onClicked: {
-        cities.append( { "city": "Melbourne" } );
-        cities.incrementalSort( cities.compare );
+Page {
+    Button {
+        text: qsTr("Add Melbourne")
+        onClicked: {
+            cities.append( { "city": "Melbourne" } );
+            cities.incrementalSort( cities.compare );
+        }
+    }
+
+    SortListModel {
+        id: cities
+        property var orderByCity: (a, b) => a.city.localeCompare(b.city)
+        property var compare: orderByCity
     }
 }
 ```
@@ -36,37 +40,43 @@ of large lists. We can keep track of where the list was sorted, and use
 `sortItems` to continue sorting records from that point onwards.
 
 ```qml
-SortListModel {
-    id: cities
-    property var orderByCity: (a, b) => a.city.localeCompare(b.city)
-    property var orderByCityDescending: (a, b) => -a.city.localeCompare(b.city)
-    property var compare: orderByCity
-    property int sorted: 0
-    function sortOne() {
-        if (sorted >= count) return;
-        sortItems(sorted, sorted+1, compare);
-        sorted++;
-        Qt.callLater(sortOne);
-    }
-    function sortAll() {
-        sorted = 0;
-        Qt.callLater(sortOne);
-    }
-}
+import "qt5-qml-sortlistmodel"
 
-Button {
-    text: qsTr("Sort by City")
-    onClicked: {
-        cities.compare = cities.orderByCity;
-        cities.sortAll();
-     }
-}
+Page {
+    Column {
+        Button {
+            text: qsTr("Sort by City")
+            onClicked: {
+                cities.compare = cities.orderByCity;
+                cities.sortAll();
+            }
+        }
 
-Button {
-    text: qsTr("Sort by City Descending")
-    onClicked: {
-        cities.compare = cities.orderByCityDescending;
-        cities.sortAll();
+        Button {
+            text: qsTr("Sort by City Descending")
+            onClicked: {
+                cities.compare = cities.orderByCityDescending;
+                cities.sortAll();
+            }
+        }
+    }
+
+    SortListModel {
+        id: cities
+        property var orderByCity: (a, b) => a.city.localeCompare(b.city)
+        property var orderByCityDescending: (a, b) => -a.city.localeCompare(b.city)
+        property var compare: orderByCity
+        property int sorted: 0
+        function sortOne() {
+            if (sorted >= count) return;
+            sortItems(sorted, sorted+1, compare);
+            sorted++;
+            Qt.callLater(sortOne);
+        }
+        function sortAll() {
+            sorted = 0;
+            Qt.callLater(sortOne);
+        }
     }
 }
 ```
