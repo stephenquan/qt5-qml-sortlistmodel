@@ -67,15 +67,19 @@ Page {
         property var orderByCityDescending: (a, b) => -a.city.localeCompare(b.city)
         property var compare: orderByCity
         property int sorted: 0
-        function sortOne() {
+        property int sortNum: 10
+        function sortMore() {
             if (sorted >= count) return;
-            sortItems(sorted, sorted+1, compare);
-            sorted++;
-            Qt.callLater(sortOne);
+            for (int i = 0; i < sortNum; i++) {
+                sortItems(sorted, sorted+1, compare);
+                sorted++;
+                if (sorted >= count) return;
+            }
+            Qt.callLater(sortMore);
         }
         function sortAll() {
             sorted = 0;
-            Qt.callLater(sortOne);
+            Qt.callLater(sortMore);
         }
     }
 }
