@@ -1,12 +1,19 @@
 # qt5-qml-sortlistmodel
 Implements SortListModel QML component.
 
-It extends the ListModel QML component with the following methods:
+It extends the ListModel QML component with the public properties and methods:
 
- - findInsertIndex(item, head, tail, compareFunc)
- - sortItems(head, tail, compareFunc)
- - incrementalSort(compareFunc)
- - sort(compareFunc)
+ - property int sortOrder
+ - property var sortRole
+ - property var sortCompare
+ - method resort()
+
+it also has the following private methods:
+
+ - method sortMore()
+ - method defaultCompare()
+ - method findInsertIndex(item, head, tail, compareFunc)
+ - method sortItems(head, tail, compareFunc)
 
 These methods help us implement an in-place sort.
 
@@ -23,67 +30,56 @@ Page {
         text: qsTr("Add Melbourne")
         onClicked: {
             cities.append( { "city": "Melbourne" } );
-            cities.incrementalSort( cities.compare );
         }
     }
 
     SortListModel {
         id: cities
-        property var orderByCity: (a, b) => a.city.localeCompare(b.city)
-        property var compare: orderByCity
+        sortRole: "city"
+        sortOrder: Qt.AscendingOrder
     }
 }
 ```
 
-When used with `Qt.callLater`, we can get interesting UI friendly resorting
-of large lists. We can keep track of where the list was sorted, and use
-`sortItems` to continue sorting records from that point onwards.
+The `sortRole` can be a string, string array or an object array.
+This is to support sorting based on 1 or many columns and in different
+direction.
+
+To sort ArcGIS Online items in alphabetical order, but, with similar
+named items we can used the modified to rank further.
 
 ```qml
-import "qt5-qml-sortlistmodel"
-
-Page {
-    Column {
-        Button {
-            text: qsTr("Sort by City")
-            onClicked: {
-                cities.compare = cities.orderByCity;
-                cities.sortAll();
-            }
-        }
-
-        Button {
-            text: qsTr("Sort by City Descending")
-            onClicked: {
-                cities.compare = cities.orderByCityDescending;
-                cities.sortAll();
-            }
-        }
-    }
-
-    SortListModel {
-        id: cities
-        property var orderByCity: (a, b) => a.city.localeCompare(b.city)
-        property var orderByCityDescending: (a, b) => -a.city.localeCompare(b.city)
-        property var compare: orderByCity
-        property int sorted: 0
-        function sortOne() {
-            if (sorted >= count) return;
-            sortItems(sorted, sorted+1, compare);
-            sorted++;
-            Qt.callLater(sortOne);
-        }
-        function sortAll() {
-            sorted = 0;
-            Qt.callLater(sortOne);
-        }
-    }
+SortListModel {
+    id: items
+    sortRole: [ "title", "modified" ]
+    sortOrder: Qt.AscendingOrder
 }
-```
+```        
 
-For completeness a `sort` method is provide which performs a full sort,
-but, for very large list this could have unintended consequences of
-blocking the UI.
+If you want the ArcGIS Online items sorted in alphabetical order
+but with the modified date in reverse order.
+
+```qml
+SortListModel {
+    id: items
+    sortRole: { [ { "sortRole": "title",
+                    "sortOrder": Qt.AscendingOrder },
+                  { "sortRole": "modified",
+                    "sortOrder": Qt.DescendingOrder } ] )
+}
+```        
+
+The algorithm implements an incremental merge sort so unsorted items get
+scheduled to be sorted.
+
+The private method `sortMore` will incremental merge sort as many items
+it can within 50s before scheduling the next iteration of `sortMore`
+with `Qt.callLater`.
+
+This improves the user experience with the UI thread always free to
+react to user events such as scrolling a ListView whilst a sort is
+occuring. It also allows the user to change the sort properties without
+needing to wait for an existing sort to complete.
 
 To use SortListModel QML component in your project consider cloning this
 repo directly in your project:
