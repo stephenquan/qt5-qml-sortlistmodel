@@ -4,20 +4,22 @@ ListModel {
     property int sortOrder: Qt.AscendingOrder
     property var sortRole: ""
     property var sortCompare: null
-    readonly property int sorted: internal.sorted
+    readonly property int sortCount: internal.sortCount
+    readonly property bool sorted: internal.sortCount >= count
+    readonly property bool sorting: !sorted
 
     property QtObject internal: QtObject {
-        property int sorted: 0
+        property int sortCount: 0
         property var sortOps: [ ]
     }
 
     onCountChanged: {
-        if (count < internal.sorted) {
-            internal.sorted = count;
+        if (count < internal.sortCount) {
+            internal.sortCount = count;
             return;
         }
 
-        if (internal.sorted < count) {
+        if (internal.sortCount < count) {
             Qt.callLater(sortMore);
         }
     }
@@ -26,7 +28,7 @@ ListModel {
     onSortRoleChanged: Qt.callLater(resort)
 
     function resort() {
-        internal.sorted = 0;
+        internal.sortCount = 0;
         compileSortRole();
         Qt.callLater(sortMore);
     }
@@ -66,15 +68,15 @@ ListModel {
     }
 
     function sortMore() {
-        if (internal.sorted >= count)  return;
+        if (internal.sortCount >= count)  return;
 
         for (let ts = Date.now(); Date.now() < ts + 50; ) {
-            sortItems(internal.sorted, internal.sorted + 1, sortCompare || defaultCompare);
-            internal.sorted++;
-            if (internal.sorted >= count) return;
+            sortItems(internal.sortCount, internal.sortCount + 1, sortCompare || defaultCompare);
+            internal.sortCount++;
+            if (internal.sortCount >= count) return;
         }
 
-        if (internal.sorted < count) {
+        if (internal.sortCount < count) {
             Qt.callLater(sortMore);
         }
     }
