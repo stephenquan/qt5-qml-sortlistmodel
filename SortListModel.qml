@@ -20,7 +20,7 @@ ListModel {
         }
 
         if (internal.sortCount < count) {
-            Qt.callLater(sortMore);
+            Qt.callLater(sortStep);
         }
     }
 
@@ -30,7 +30,7 @@ ListModel {
     function resort() {
         internal.sortCount = 0;
         compileSortRole();
-        Qt.callLater(sortMore);
+        Qt.callLater(sortStep);
     }
 
     function compileSortRole() {
@@ -67,28 +67,36 @@ ListModel {
         }
     }
 
-    function sortMore() {
+    function sortStep() {
         if (internal.sortCount >= count)  return;
 
         for (let ts = Date.now(); Date.now() < ts + 50; ) {
-            sortItems(internal.sortCount, internal.sortCount + 1, sortCompare || defaultCompare);
+            sortItems(internal.sortCount, internal.sortCount + 1, sortCompare || defaultSortCompare);
             internal.sortCount++;
             if (internal.sortCount >= count) return;
         }
 
         if (internal.sortCount < count) {
-            Qt.callLater(sortMore);
+            Qt.callLater(sortStep);
         }
     }
 
-    function defaultCompare(a, b) {
+    function naturalExpand(str) {
+        return str.replace(/\d+/g, n => n.padStart(8, "0"));
+    }
+
+    function naturalCompare(a, b) {
+        return naturalExpand(a).localeCompare(naturalExpand(b));
+    }
+
+    function defaultSortCompare(a, b) {
         let cmp = 0;
         for (let sortOp of internal.sortOps) {
             let sortRole = sortOp.sortRole;
             let aval = a[sortRole];
             let bval = b[sortRole];
             if (typeof(aval) === 'string' && typeof(bval) === 'string') {
-                cmp = aval.localeCompare(bval);
+                cmp = naturalCompare(aval, bval);
             } else {
                 cmp = aval - bval;
             }
