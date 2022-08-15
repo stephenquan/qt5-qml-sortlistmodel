@@ -26,10 +26,24 @@ For example:
 import "qt5-qml-sortlistmodel"
 
 Page {
-    Button {
-        text: qsTr("Add Melbourne")
-        onClicked: {
-            cities.append( { "city": "Melbourne" } );
+    ListView {
+        anchors.fill: parent
+        model: cities
+        clip: true
+        delegate: Text {
+            width: ListView.view.width
+            text: city
+        }
+    }
+    
+    footer: RowLayout {
+        Button {
+            text: qsTr("Random City")
+            onClicked: {
+                const list = [ "Melbourne", "Paris", "New York" ];
+                const city = list[Math.floor(Math.random() * list.length)];
+                cities.append( { city  } );
+            }
         }
     }
 
@@ -72,9 +86,10 @@ SortListModel {
 The algorithm implements an incremental merge sort so unsorted items get
 scheduled to be sorted.
 
-The private method `sortMore` will incremental merge sort as many items
-it can within 50s before scheduling the next iteration of `sortMore`
-with `Qt.callLater`.
+The private method `sortStep` is invoked repeatedly with `Qt.callLater`
+to incrementally merge sort the entire list. Each iteration of `sortStep`
+will sort as many items it can within 50ms before scheduling the next
+iteration of `sortStep`.
 
 This improves the user experience with the UI thread always free to
 react to user events such as scrolling a ListView whilst a sort is
