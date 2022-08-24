@@ -103,5 +103,5 @@ repo directly in your project:
     
 or adding it as a submodule:
 
-    git submodule add https://github.com/stephenquan/qt5-qml-sortlistmodel.git qt5-qml-sortmodel
+    git submodule add https://github.com/stephenquan/qt5-qml-sortlistmodel.git qt5-qml-sortlistmodel
     git submodule update
