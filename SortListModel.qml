@@ -14,14 +14,8 @@ ListModel {
     }
 
     onCountChanged: {
-        if (count < internal.sortCount) {
-            internal.sortCount = count;
-            return;
-        }
-
-        if (internal.sortCount < count) {
-            Qt.callLater(sortStep);
-        }
+        if (count < internal.sortCount) { internal.sortCount = count; return; }
+        if (internal.sortCount < count) Qt.callLater(sortStep);
     }
 
     onSortOrderChanged: Qt.callLater(resort)
@@ -53,32 +47,17 @@ ListModel {
 
         for (let op of sortRole ) {
             let _sortRole = op.sortRole;
-            if (!_sortRole) {
-                continue;
-            }
-
-            let _op = {
-                sortRole: _sortRole
-            };
-            if ("sortOrder" in op) {
-                _op.sortOrder = op.sortOrder;
-            }
+            if (!_sortRole) continue;
+            let _op = { sortRole: _sortRole };
+            if ("sortOrder" in op) _op.sortOrder = op.sortOrder;
             internal.sortOps.push( _op );
         }
     }
 
     function sortStep() {
-        if (internal.sortCount >= count)  return;
-
-        for (let ts = Date.now(); Date.now() < ts + 50; ) {
-            sortItems(internal.sortCount, internal.sortCount + 1, sortCompare || defaultSortCompare);
-            internal.sortCount++;
-            if (internal.sortCount >= count) return;
-        }
-
-        if (internal.sortCount < count) {
-            Qt.callLater(sortStep);
-        }
+        for (let ts = Date.now(); internal.sortCount < count && Date.now() < ts + 50; )
+            sortItem(internal.sortCount++);
+        if (internal.sortCount < count) Qt.callLater(sortStep);
     }
 
     function naturalExpand(str) {
@@ -109,55 +88,25 @@ ListModel {
     }
 
     function findInsertIndex(item, head, tail, compareFunc) {
-        if (head >= count) {
-            return head;
-        }
-
+        if (head >= count) return head;
         let cmp = compareFunc(item, get(head));
-        if (cmp <= 0) {
-            return head;
-        }
-
+        if (cmp <= 0) return head;
         cmp = compareFunc(item, get(tail));
-        if (cmp === 0) {
-            return tail;
-        }
-        if (cmp > 0) {
-            return tail + 1;
-        }
-
+        if (cmp === 0) return tail;
+        if (cmp > 0) return tail + 1;
         while (head + 1 < tail) {
             let mid = (head + tail) >> 1;
             cmp = compareFunc(item, get(mid));
-            if (cmp === 0) {
-                return mid;
-            }
-
-            if (cmp > 0) {
-                head = mid;
-            } else {
-                tail = mid;
-            }
+            if (cmp === 0) return mid;
+            if (cmp > 0) head = mid; else tail = mid;
         }
-
         return tail;
     }
 
-    function sortItems(head, tail, compareFunc) {
-       while (head < tail) {
-           if (head === 0) {
-               head++;
-               continue;
-           }
-
-           let index = findInsertIndex(get(head), 0, head - 1, compareFunc);
-           if (head === index) {
-               head++;
-               continue;
-           }
-
-           move(head, index, 1);
-           head++;
-       }
+    function sortItem(index) {
+       if (index === 0) return;
+       let newIndex = findInsertIndex(get(index), 0, index - 1, sortCompare || defaultSortCompare);
+       if (newIndex === index) return;
+       move(index, newIndex, 1);
     }
 }
