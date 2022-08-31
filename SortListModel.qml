@@ -79,10 +79,7 @@ ListModel {
             } else {
                 cmp = aval - bval;
             }
-            if (cmp) {
-                let sign = sortOp.sortOrder === Qt.DescendingOrder ? -1 : 1;
-                return sign * cmp;
-            }
+            if (cmp) return sortOp.sortOrder === Qt.DescendingOrder ? -cmp : cmp;
         }
         return 0;
     }
