@@ -45,11 +45,22 @@ ListModel {
             return;
         }
 
-        for (let op of sortRole ) {
-            let _sortRole = op.sortRole;
+        for (let _sortRole of sortRole ) {
+            if (typeof(_sortRole) === 'string') {
+                let _op = {
+                    sortRole: _sortRole,
+                    sortOrder: sortOrder
+                };
+                internal.sortOps.push( _op );
+                continue;
+            }
+            let op = _sortRole;
+            _sortRole = op.sortRole;
             if (!_sortRole) continue;
-            let _op = { sortRole: _sortRole };
-            if ("sortOrder" in op) _op.sortOrder = op.sortOrder;
+            let _op = {
+                sortRole: _sortRole,
+                sortOrder: ("sortOrder" in op) ? op.sortOrder : sortOrder
+            };
             internal.sortOps.push( _op );
         }
     }
