@@ -28,11 +28,6 @@ It requires the record to already be in the ListModel, typically placed at the e
 For example:
 
 ```qml
-import QtQuick 2.12
-import QtQuick.Controls 2.5
-import QtQuick.Layouts 1.12
-import "qt5-qml-sortlistmodel"
-
 Page {
     ListView {
         anchors.fill: parent
@@ -78,7 +73,7 @@ Page {
             "Sort By Population",
             "Sort By Population Descending",
             "Sort By Country Ascending, City Ascending",
-            "Sort By Country Ascending, City Descending"
+            "Sort By Country Descending, City Ascending"
         ]
         onCurrentTextChanged: {
             switch (currentText) {
@@ -106,12 +101,12 @@ Page {
                               "sortOrder": Qt.AscendingOrder },
                         ]
                 break;
-            case "Sort By Country Ascending, City Descending":
+            case "Sort By Country Descending, City Ascending":
                 cities.sortRole = [
                             { "sortRole": "country",
-                              "sortOrder": Qt.AscendingOrder },
-                            { "sortRole": "city",
                               "sortOrder": Qt.DescendingOrder },
+                            { "sortRole": "city",
+                              "sortOrder": Qt.AscendingOrder },
                         ]
                 break;
             }
