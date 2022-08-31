@@ -28,27 +28,93 @@ It requires the record to already be in the ListModel, typically placed at the e
 For example:
 
 ```qml
+import QtQuick 2.12
+import QtQuick.Controls 2.5
+import QtQuick.Layouts 1.12
 import "qt5-qml-sortlistmodel"
 
 Page {
     ListView {
         anchors.fill: parent
-        model: cities
+        model: SortListModel {
+            id: cities
+            sortRole: "city"
+            sortOrder: Qt.AscendingOrder
+            Component.onCompleted: {
+                append( { city: "Melbourne", country: "AUS", pop: 5078000 } );
+                append( { city: "Sydney", country: "AUS", pop: 5312000 } );
+                append( { city: "Paris", country: "FR", pop: 2161000 } );
+                append( { city: "New York", country: "USA", pop: 8380000 } );
+                append( { city: "California", country: "USA", pop: 39350000 } );
+            }
+        }
         clip: true
-        delegate: Text {
+        delegate: Frame {
             width: ListView.view.width
-            text: city
+            RowLayout {
+                width: parent.width
+                Text {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 200
+                    text: city
+                }
+                Text {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 200
+                    text: country
+                }
+                Text {
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 200
+                    text: pop
+                }
+            }
         }
     }
-
-    SortListModel {
-        id: cities
-        sortRole: "city"
-        sortOrder: Qt.AscendingOrder
-        Component.onCompleted: {
-            append( { city: "Melbourne", pop: 5078000 } );
-            append( { city: "Paris", pop: 2161000 } );
-            append( { city: "New York", pop: 8380000 } );
+    footer: ComboBox {
+        model: [
+            "Sort By City",
+            "Sort By City Descending",
+            "Sort By Population",
+            "Sort By Population Descending",
+            "Sort By Country Ascending, City Ascending",
+            "Sort By Country Ascending, City Descending"
+        ]
+        onCurrentTextChanged: {
+            switch (currentText) {
+            case "Sort By City":
+                cities.sortRole = "city";
+                cities.sortOrder = Qt.AscendingOrder;
+                break;
+            case "Sort By City Descending":
+                cities.sortRole = "city";
+                cities.sortOrder = Qt.DescendingOrder;
+                break;
+            case "Sort By Population":
+                cities.sortRole = "pop";
+                cities.sortOrder = Qt.AscendingOrder;
+                break;
+            case "Sort By Population Descending":
+                cities.sortRole = "pop";
+                cities.sortOrder = Qt.DescendingOrder;
+                break;
+            case "Sort By Country Ascending, City Ascending":
+                cities.sortRole = [
+                            { "sortRole": "country",
+                              "sortOrder": Qt.AscendingOrder },
+                            { "sortRole": "city",
+                              "sortOrder": Qt.AscendingOrder },
+                        ]
+                break;
+            case "Sort By Country Ascending, City Descending":
+                cities.sortRole = [
+                            { "sortRole": "country",
+                              "sortOrder": Qt.AscendingOrder },
+                            { "sortRole": "city",
+                              "sortOrder": Qt.DescendingOrder },
+                        ]
+                break;
+            }
         }
     }
 }
