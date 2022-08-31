@@ -16,7 +16,7 @@ it also has the following private methods:
  - method sortStep() // binary insertion incremental sort loop with pauses every 50ms threshold
  - method defaultSortCompare() // provided sort comparator
  - method findInsertIndex(item, head, tail, compareFunc) // use binary search to find where to move an unsorted item to
- - method sortItem(index) // moves an unsorted record to it's sorted spot
+ - method sortItem(index) // moves an unsorted record to its sorted spot
 
 These methods help us implement an in-place sort.
 
