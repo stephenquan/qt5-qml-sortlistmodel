@@ -56,23 +56,33 @@ The `sortRole` can be a string, string array or an object array.
 This is to support sorting based on 1 or many columns and in different
 direction.
 
+To sort just the `city` we only need to set `sortRole` to a string.
+
+```qml
+SortListModel {
+    id: cities
+    sortRole: "city"
+    sortOrder: Qt.AscendingOrder
+}
+```
+    
 To sort both `city` and `pop` roles with `city` having priority set
 `sortRole` to a string array.
 
 ```qml
 SortListModel {
-    id: items
+    id: cities
     sortRole: [ "city", "pop" ]
     sortOrder: Qt.AscendingOrder
 }
 ```        
 
 To sort `city` and `pop` with differing sortOrders applied set
-`sortROle` to an object array.
+`sortRole` to an object array.
 
 ```qml
 SortListModel {
-    id: items
+    id: cities
     sortRole: { [ { "sortRole": "city",
                     "sortOrder": Qt.AscendingOrder },
                   { "sortRole": "pop",
@@ -85,13 +95,16 @@ scheduled to be sorted.
 
 The private method `sortStep` is invoked repeatedly with `Qt.callLater`
 to incrementally merge sort the entire list. Each iteration of `sortStep`
-will sort as many items it can within 50ms before scheduling the next
-iteration of `sortStep`.
+will sort as many items it can within a 50ms threshold before scheduling
+the next invocation of `sortStep`.
 
-This improves the user experience with the UI thread always free to
-react to user events such as scrolling a ListView whilst a sort is
-occuring. It also allows the user to change the sort properties without
-needing to wait for an existing sort to complete.
+This improves the user UI/UX experience. The application can:
+ - react to user events such as scrolling the ListView
+ - append more records to the ListModel whilst a sort is in progress
+ - change sortRole to reset the incremental sort without waiting
+
+If the list is mostly sorted, the incremental sort will quickly locate the
+unsorted items and sort them in less time that it takes to do a full sort.
 
 To use SortListModel QML component in your project consider cloning this
 repo directly in your project:
