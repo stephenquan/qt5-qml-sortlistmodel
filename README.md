@@ -9,10 +9,12 @@ It extends the ListModel QML component with the public properties and methods:
  - property int sortCount     // number of records that have been sorted.
  - property bool sorted       // indicates whether sorting has finished.
  - property bool sorting      // indicates whether sorting is still ongoing.
+ - method resort() // forces incremental sort to start over.
 
 it also has the following private methods:
 
- - method resort() // forces incremental sort to start over.
+ - method naturalExpand(str) // pads all numbers in the string to 8 digits
+ - method naturalCompare(a, b) // compares two strings with the numbers normalized with naturalExpand
  - method sortStep() // binary insertion incremental sort loop with pauses every 50ms threshold
  - method defaultSortCompare() // provided sort comparator
  - method findInsertIndex(item, head, tail, compareFunc) // use binary search to find where to move an unsorted item to
